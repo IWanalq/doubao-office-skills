@@ -1,0 +1,90 @@
+{
+  "_about": "briefing.json 人读数据契约 v0.8。模型只填这份 JSON;深度对话框回复与 HTML 都由它渲染。HTML 固定按 7 段叙事链呈现:核心观点 -> 关键增量信息 -> 为什么重要 -> 如何影响市场 -> 各方观点 -> 验证/证伪信号 -> 信息来源。dialog_brief 必须让用户不打开 HTML 也能读懂核心判断、关键依据、分歧和后续验证;news_items 只写事实; insight 只写重要性、变化和分歧; section_summaries 是历史字段名,实际语义是给影响链、各方观点、验证/证伪三个后段栏目各写一段关键洞见; interpretation 按来源角色写观点; verification 写可观察的确认/证伪信号; references 是所有事实和观点的来源账本,由底部「信息来源」和正文引用 popover、新闻卡、观点卡共同承载。",
+  "_machine_schema": "正式 JSON Schema 见 references/briefing.schema.json;schema 未列字段会被拒绝。运行时业务规则由 scripts/validate_briefing.py / scripts/briefing_validation.py 执行。",
+  "_fields": {
+    "schema_version": "固定字符串 \"0.6\"",
+    "meta": {
+      "title": "简报标题",
+      "question_type": "只能是 market|policy|event|update。市场级主题、板块作为全市场风险偏好或资金线索时用 market + analysis_mode=theme_watch;命中具体个股/板块/行业/公司深度问题时应先转相邻 Skill,不要产出本简报。",
+      "analysis_mode": "可选; market_event|policy_macro|dated_catalyst|theme_watch 为常用市场级镜头; earnings_event 用于财报季或业绩风险已经进入市场级语境的情况。用于选择分析镜头,不改变前台栏目结构。",
+      "time_window": "如 2026-06-04 ~ 2026-06-11",
+      "market_session": "pre|intraday|post|non_trading",
+      "generated_at": "ISO8601 带 +08:00",
+      "source_scope": "信源范围说明",
+      "disclaimer_id": "standard_v2_full_risk_notice",
+      "locale": "zh-CN"
+    },
+    "section_flags": "决定 HTML 显示哪些栏目:screen1/news/interpretation/timeline/update_diff/source_check/follow_ups 各 true/false",
+    "dialog_brief": {
+      "_写法": "深度对话框回复的核心数据源。它不是 HTML 摘要,也不是短入口卡片;用户只看对话框也要能得到完整答案。最终对话框正文还会结合 news_items、insight、visuals.impact_facts、interpretation 和 verification 生成关键增量信息、为什么现在重要、影响链、分歧与反向证据、后续验证/证伪。必须直接回答问题,讲清依据、分歧、验证条件和边界,但仍不得给买卖建议、目标价、仓位或涨跌承诺。",
+      "verdict": "核心判断,直接回答用户问题并点明市场含义",
+      "executive_summary": "完整摘要,把事实变化、市场含义、限制条件和分歧讲顺",
+      "key_points": "推荐给模型填写为对象 {fact_change:{text,refs}, market_meaning:{text,refs}, disagreement:{text,refs}, verification:{text,refs}}。交付入口会规范化为渲染所需的中文 label 数组。必须覆盖事实变化、市场含义、分歧点、后续验证。text 要像给普通股民解释的一句话,按角色写清依据、判断、反向条件或后续观察;refs 只能引用 references[] 中公开来源",
+      "watch_signals": "2-4 条后续观察信号,写成用户能跟踪的验证或证伪信号,不要只写对象名或泛泛写关注风险",
+      "risk_boundary": "可省略。交付入口会按固定免责声明补齐为信息边界,模型不要自由改写"
+    },
+    "insight": {
+      "_写法": "insight 只提供「这些信息为什么重要？」所需的变化、预期差和分歧素材。每个字段都写成连贯、口语化的表达,像一个懂行的人在跟你解释;可用「因为/但/目前来看/接下来」等连接词把因果讲顺。one_sentence 之外的字段可以适当写详细一点。",
+      "one_sentence": "一句话判断,同时作大标题,保持精炼",
+      "why_now": "为什么现在重要",
+      "what_changed": "真正变化:相比上一阶段事实、预期或节奏哪里变了",
+      "consensus_vs_delta": "共识是什么、预期差在哪",
+      "positive_case": "正向条件:哪些事实会让核心观点更站得住",
+      "negative_case": "反向条件:哪些事实会削弱或推翻核心观点",
+      "confirm_signals": "数组,2-3 个确认信号;只作为洞见摘要,不能替代 verification.confirm",
+      "invalidate_signals": "数组,2-3 个证伪信号;只作为洞见摘要,不能替代 verification.invalidate",
+      "confidence": "高|中|低,表示对新闻解读的信心,不代表投资建议"
+    },
+    "reading_budget": {
+      "thirty_second": "30 秒层摘要;作为 HTML 核心观点段落,必须补充事实依据、市场含义、限制条件或主要分歧,不能一句话结束",
+      "one_minute": "1 分钟层应读栏目,数组,如 [\"核心观点\",\"关键增量信息\",\"为什么重要\",\"验证/证伪信号\"]",
+      "three_minute": "3 分钟层应读栏目,数组,如 [\"市场影响链\",\"各方观点\",\"信息来源\"]",
+      "default_news_count": "默认展示重点信息条数,建议 3",
+      "max_frontstage_chars": "完整前台正文目标上限,建议 1200"
+    },
+    "section_summaries": {
+      "_写法": "历史字段名保留为 section_summaries,但前台标签是「关键洞见」。这里不是摘要,不能复述本节卡片内容;必须给出二阶判断:预期差、传导断点、限制条件、最小验证信号或迫使判断下修的条件。写法上优先使用「关键不在...而在...」「如果...否则...」「真正分歧是...」这类有转折和条件的句子。",
+      "impact": "「上述信息如何影响市场？」标题下的关键洞见,说明真正起作用的市场变量、传导断点和限制条件",
+      "viewpoints": "「各方有哪些值得关注的观点？」标题下的关键洞见,说明表面分歧背后的真实分歧以及哪类证据最有判别力",
+      "verification": "「哪些信号会验证/证伪核心观点？」标题下的关键洞见,说明最小充分验证信号以及哪个信号会迫使判断下修"
+    },
+    "highlight": {
+      "lead_ref": "首要新闻引用 id;必须指向 references[].id",
+      "main_signal": "核心信号",
+      "key_change": "最大变化",
+      "watch_point": "后续观察",
+      "tone": "neutral|positive|risk,只影响视觉语气,不代表投资建议"
+    },
+    "visuals": {
+      "summary_cards": "数组;每项 {label,value,tone?};建议 3-4 项,首屏「关键证据」。不要为了凑固定 3 条牺牲逻辑,也不要超过 4 条。模板不显示 1/2/3 编号,也不显示涨跌箭头;只把 value 里的关键数字、日期或用 `【】` 标记的重点词变成强调色,不要让整句都变色。",
+      "impact_chain": "数组;3-6 个节点标题,渲染为横向因果流程图(起因/传导/结果/前瞻),不列具体受益股",
+      "impact_facts": "推荐数组;每项用 {step,fact,refs:[id]}。step 指向 impact_chain 第几个节点,HTML 会把 fact 作为对应步骤标题下的一段节点正文显示;不要再单独拆一个背景事实模块。fact 要讲清这一步为什么成立、对市场定价意味着什么,并在句末带引用,也不要拆成「变量变化 / 市场含义 / 支撑事实」字段。",
+      "timeline": "可选数组;每项 {date,label,kind};用于横向时间线,≥3 个带日期事件时建议提供并把 section_flags.timeline 设为 true"
+    },
+    "screen1": {
+      "main_thread": "核心主线",
+      "biggest_change": "最大新增变化",
+      "controversy": "争议强度说明,如 偏高/分歧集中在量产节奏",
+      "controversy_level": "可选;枚举 低|中|高,用于驱动分段可视化",
+      "watch_next": "后续看点"
+    },
+    "news_items": "数组;每项 {title, ref, time, time_uncertain(bool), importance:高|中|低, why, category}。默认展示前 3 条,因此排序必须稳定。category=政策|产业|公司|海外映射|市场反应|机构观点|后续观察。ref 指向 references[].id。category/importance/time/ref 会直接驱动 HTML 的稳定排序、来源联动和相对时间;why 是标题下面的事实摘要,必须补充标题没有说清的依据、影响范围和限制条件;不要复述标题,不要写“某来源公开信息显示/据报道/发布时间为”等废话,来源会在卡片底部链接区展示。time 优先填 ISO8601 或 YYYY-MM-DD HH:mm / YYYY-MM-DD;无法确认则原样填并标 time_uncertain=true。不要给 news_items 填 image;关键增量信息固定纯文本渲染,机器 schema 会拒绝 image,避免前置破图或低质配图抢占事实列表。",
+    "interpretation": "数组;每项 {role?, point, refs:[id]} ;至少 3 条,建议 3-5 条,渲染为前台栏目「各方有哪些值得关注的观点？」。role 优先使用 客观事实|市场反应|机构观点|反向证据;也可使用 官方事实|市场定价|机构视角|媒体报道|资金信号。point 写该角色提供的证据、判断、市场含义和分歧,读者不点链接也能知道这方观点在说什么;refs 必须回指公开来源;前台直接显示 point 正文并把引用接在句末,不要另写 title/headline 或依赖正文截断小标题,不写“很可能/需关注/公开信息显示”这类空泛句。",
+    "verification": {
+      "_说明": "必填;前台渲染为独立「验证 / 证伪信号」模块。confirm/invalidate 各至少 2 项。",
+      "confirm": "必填数组;每项 {signal, watch, meaning, refs?}; signal 是信号名, watch 是观察口径, meaning 是触发后对核心观点的含义。",
+      "invalidate": "必填数组;每项 {signal, watch, meaning, refs?}; 写会推翻或削弱核心观点的信号,不是泛泛风险。"
+    },
+    "timeline": "数组(事件追踪时);每项 {date, event, kind: official|media|institution}",
+    "update_diff": "数组(更新追踪时);每项 {point, refs:[id]} ,只讲新增变化",
+    "source_check": "对象 {official:[id], media:[id], institution:[id], internal_excluded:[id]}。internal_excluded 仅用于审计,前台不展示",
+    "follow_ups": "可选数组,后续追问建议(字符串)。注:页面已移除「继续追问」板块,此字段当前不在 HTML 渲染,可留作对话侧建议或省略",
+    "references": "数组;每项 {id, title, source, level:A|B|C|D, type:official|media|institution|background|unverified, corroboration:int, date, url}。同一网页只能有一个 id;同一篇文章支撑多个事实/观点时复用同一个 id,不要按用途拆成多条来源。严格校验会按 canonical URL 拦截重复网页。前 5 条应优先放支撑核心事实的一手/权威来源,宏观政策、通胀、能源、利率预期等尽量使用 Fed/ECB/CME/EIA/BLS/BEA/财政部/交易所等官方或准官方页面;超过 5 条公开来源时,前台会默认折叠其余来源,但不显示来源数量摘要句。type=unverified 或 level=D 默认不进入前台新闻;确需纳入时改写为争议点/官方回应。date 优先填 ISO8601 或 YYYY-MM-DD;无法确认则用原始口径,渲染端不会硬算相对时间",
+    "query_log": "可选内部审计数组;每项 {query, intent, source_scope, result_count?, used_refs?}。用于记录搜过什么、为什么搜、是否进入前台;默认不渲染。",
+    "evidence_atoms": "可选内部证据数组;每项 {claim, source, url, date, excerpt, context, confidence:HIGH|MEDIUM|LOW, refs?}。一条一事实,用于支撑洞见和 news_items;默认不渲染。",
+    "coverage_gaps": "可选内部审计数组;每项 {angle, reason, next_query?}。记录未找到可靠信息的角度,用于避免硬编。",
+    "conflicts": "可选内部审计数组;每项 {claim, source_a, source_b, nature, handling}。官方/媒体/机构口径冲突时保留,不要压平。"
+  },
+  "_minimal_required": ["schema_version", "meta", "dialog_brief", "insight", "reading_budget", "section_summaries", "highlight", "visuals", "screen1", "news_items", "verification", "source_check", "references"],
+  "_recommended_internal_audit": ["query_log", "evidence_atoms", "coverage_gaps", "conflicts"]
+}

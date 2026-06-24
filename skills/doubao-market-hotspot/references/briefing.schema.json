@@ -1,0 +1,404 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.local/doubao-market-hotspot/briefing.schema.json",
+  "title": "doubao-market-hotspot briefing.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "meta",
+    "dialog_brief",
+    "insight",
+    "reading_budget",
+    "section_summaries",
+    "highlight",
+    "visuals",
+    "screen1",
+    "news_items",
+    "verification",
+    "source_check",
+    "references"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "const": "0.6"},
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "title",
+        "question_type",
+        "time_window",
+        "market_session",
+        "generated_at",
+        "source_scope",
+        "disclaimer_id",
+        "locale"
+      ],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "question_type": {
+          "type": "string",
+          "enum": ["market", "policy", "event", "update"]
+        },
+        "analysis_mode": {
+          "type": "string",
+          "enum": ["market_event", "policy_macro", "dated_catalyst", "earnings_event", "theme_watch"]
+        },
+        "time_window": {"type": "string", "minLength": 1},
+        "market_session": {"type": "string", "enum": ["pre", "intraday", "post", "non_trading"]},
+        "generated_at": {"type": "string", "minLength": 1},
+        "source_scope": {"type": "string", "minLength": 1},
+        "disclaimer_id": {"type": "string", "enum": ["standard_v2_full_risk_notice"]},
+        "locale": {"type": "string", "const": "zh-CN"}
+      }
+    },
+    "section_flags": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "screen1": {"type": "boolean"},
+        "visuals": {"type": "boolean"},
+        "news": {"type": "boolean"},
+        "interpretation": {"type": "boolean"},
+        "timeline": {"type": "boolean"},
+        "update_diff": {"type": "boolean"},
+        "source_check": {"type": "boolean"},
+        "follow_ups": {"type": "boolean"}
+      }
+    },
+    "dialog_brief": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["verdict", "executive_summary", "key_points", "watch_signals"],
+      "properties": {
+        "verdict": {"type": "string", "minLength": 1},
+        "executive_summary": {"type": "string", "minLength": 1},
+        "key_points": {
+          "anyOf": [
+            {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 6,
+              "items": {"$ref": "#/$defs/dialog_key_point"}
+            },
+            {"$ref": "#/$defs/dialog_key_points_canonical"}
+          ]
+        },
+        "watch_signals": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "risk_boundary": {"type": "string", "minLength": 1}
+      }
+    },
+    "insight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "one_sentence",
+        "why_now",
+        "what_changed",
+        "consensus_vs_delta",
+        "positive_case",
+        "negative_case",
+        "confirm_signals",
+        "invalidate_signals",
+        "confidence"
+      ],
+      "properties": {
+        "one_sentence": {"type": "string", "minLength": 1},
+        "why_now": {"type": "string", "minLength": 1},
+        "what_changed": {"type": "string", "minLength": 1},
+        "consensus_vs_delta": {"type": "string", "minLength": 1},
+        "positive_case": {"type": "string", "minLength": 1},
+        "negative_case": {"type": "string", "minLength": 1},
+        "confirm_signals": {"type": "array", "items": {"type": "string"}, "minItems": 2},
+        "invalidate_signals": {"type": "array", "items": {"type": "string"}, "minItems": 2},
+        "confidence": {"type": "string", "enum": ["高", "中", "低"]}
+      }
+    },
+    "reading_budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["thirty_second", "one_minute", "three_minute", "default_news_count", "max_frontstage_chars"],
+      "properties": {
+        "thirty_second": {"type": "string", "minLength": 1},
+        "one_minute": {"type": "array", "items": {"type": "string"}},
+        "three_minute": {"type": "array", "items": {"type": "string"}},
+        "default_news_count": {"type": "integer", "minimum": 1},
+        "max_frontstage_chars": {"type": "integer", "minimum": 1}
+      }
+    },
+    "section_summaries": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["impact", "viewpoints", "verification"],
+      "properties": {
+        "impact": {"type": "string", "minLength": 1},
+        "viewpoints": {"type": "string", "minLength": 1},
+        "verification": {"type": "string", "minLength": 1}
+      }
+    },
+    "highlight": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lead_ref", "main_signal", "key_change", "watch_point", "tone"],
+      "properties": {
+        "lead_ref": {},
+        "main_signal": {"type": "string", "minLength": 1},
+        "key_change": {"type": "string", "minLength": 1},
+        "watch_point": {"type": "string", "minLength": 1},
+        "tone": {"type": "string", "enum": ["neutral", "positive", "risk"]}
+      }
+    },
+    "visuals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary_cards", "impact_chain"],
+      "properties": {
+        "summary_cards": {"type": "array", "items": {"$ref": "#/$defs/summary_card"}},
+        "impact_chain": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 6},
+        "impact_facts": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {"type": "string"},
+              {"$ref": "#/$defs/impact_fact"}
+            ]
+          }
+        },
+        "timeline": {"type": "array", "items": {"$ref": "#/$defs/visual_timeline_item"}}
+      }
+    },
+    "screen1": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["main_thread", "biggest_change", "controversy", "watch_next"],
+      "properties": {
+        "main_thread": {"type": "string", "minLength": 1},
+        "biggest_change": {"type": "string", "minLength": 1},
+        "controversy": {"type": "string", "minLength": 1},
+        "controversy_level": {"type": "string", "enum": ["低", "中", "高"]},
+        "watch_next": {"type": "string", "minLength": 1}
+      }
+    },
+    "news_items": {"type": "array", "items": {"$ref": "#/$defs/news_item"}},
+    "interpretation": {"type": "array", "items": {"$ref": "#/$defs/interpretation_item"}},
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["confirm", "invalidate"],
+      "properties": {
+        "confirm": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/verification_signal"}
+        },
+        "invalidate": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/verification_signal"}
+        }
+      }
+    },
+    "timeline": {"type": "array", "items": {"$ref": "#/$defs/timeline_item"}},
+    "update_diff": {"type": "array", "items": {"$ref": "#/$defs/interpretation_item"}},
+    "source_check": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "official": {"type": "array", "items": {}},
+        "media": {"type": "array", "items": {}},
+        "institution": {"type": "array", "items": {}},
+        "internal_excluded": {"type": "array", "items": {}}
+      }
+    },
+    "follow_ups": {"type": "array", "items": {"type": "string"}},
+    "references": {"type": "array", "items": {"$ref": "#/$defs/reference"}},
+    "query_log": {"type": "array", "items": {"$ref": "#/$defs/query_log_item"}},
+    "evidence_atoms": {"type": "array", "items": {"$ref": "#/$defs/evidence_atom"}},
+    "coverage_gaps": {"type": "array", "items": {"$ref": "#/$defs/coverage_gap"}},
+    "conflicts": {"type": "array", "items": {"$ref": "#/$defs/conflict"}}
+  },
+  "$defs": {
+    "dialog_key_point": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "text", "refs"],
+      "properties": {
+        "label": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "refs": {"type": "array", "minItems": 1, "items": {}}
+      }
+    },
+    "dialog_key_points_canonical": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fact_change", "market_meaning", "disagreement", "verification"],
+      "properties": {
+        "fact_change": {"$ref": "#/$defs/dialog_key_point_body"},
+        "market_meaning": {"$ref": "#/$defs/dialog_key_point_body"},
+        "disagreement": {"$ref": "#/$defs/dialog_key_point_body"},
+        "verification": {"$ref": "#/$defs/dialog_key_point_body"},
+        "extra": {
+          "type": "array",
+          "maxItems": 2,
+          "items": {"$ref": "#/$defs/dialog_key_point"}
+        }
+      }
+    },
+    "dialog_key_point_body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "refs"],
+      "properties": {
+        "text": {"type": "string", "minLength": 1},
+        "refs": {"type": "array", "minItems": 1, "items": {}}
+      }
+    },
+    "reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "title", "source", "level", "type", "corroboration", "date", "url"],
+      "properties": {
+        "id": {},
+        "title": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "level": {"type": "string", "enum": ["A", "B", "C", "D"]},
+        "type": {"type": "string", "enum": ["official", "media", "institution", "background", "unverified"]},
+        "corroboration": {"type": "integer", "minimum": 1},
+        "date": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "pattern": "^https?://"}
+      }
+    },
+    "news_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "ref", "time", "importance", "why", "category"],
+      "properties": {
+        "title": {"type": "string", "minLength": 1},
+        "ref": {},
+        "time": {"type": "string", "minLength": 1},
+        "time_uncertain": {"type": "boolean"},
+        "importance": {"type": "string", "enum": ["高", "中", "低"]},
+        "why": {"type": "string", "minLength": 1},
+        "category": {"type": "string", "enum": ["政策", "产业", "公司", "海外映射", "市场反应", "机构观点", "后续观察"]}
+      }
+    },
+    "summary_card": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "value"],
+      "properties": {
+        "label": {"type": "string", "minLength": 1},
+        "value": {"type": "string", "minLength": 1},
+        "tone": {"type": "string", "enum": ["neutral", "positive", "risk"]}
+      }
+    },
+    "impact_fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fact"],
+      "properties": {
+        "step": {"type": "integer", "minimum": 1},
+        "fact": {"type": "string", "minLength": 1},
+        "refs": {"type": "array", "items": {}}
+      }
+    },
+    "visual_timeline_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "label"],
+      "properties": {
+        "date": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "kind": {"type": "string"}
+      }
+    },
+    "timeline_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "event"],
+      "properties": {
+        "date": {"type": "string", "minLength": 1},
+        "event": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "enum": ["official", "media", "institution", "background"]}
+      }
+    },
+    "interpretation_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["point", "refs"],
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": ["客观事实", "市场反应", "机构观点", "官方事实", "市场定价", "机构视角", "媒体报道", "反向证据", "资金信号", "政策信号", "市场数据", "其他"]
+        },
+        "point": {"type": "string", "minLength": 1},
+        "refs": {"type": "array", "items": {}}
+      }
+    },
+    "verification_signal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["signal", "watch", "meaning"],
+      "properties": {
+        "signal": {"type": "string", "minLength": 1},
+        "watch": {"type": "string", "minLength": 1},
+        "meaning": {"type": "string", "minLength": 1},
+        "refs": {"type": "array", "items": {}}
+      }
+    },
+    "query_log_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["query", "intent", "source_scope"],
+      "properties": {
+        "query": {"type": "string", "minLength": 1},
+        "intent": {"type": "string", "minLength": 1},
+        "source_scope": {"type": "string", "minLength": 1},
+        "result_count": {"type": "integer", "minimum": 0},
+        "used_refs": {"type": "array", "items": {}}
+      }
+    },
+    "evidence_atom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim", "source", "url", "date", "excerpt", "context", "confidence"],
+      "properties": {
+        "claim": {"type": "string", "minLength": 1},
+        "source": {"type": "string", "minLength": 1},
+        "url": {"type": "string", "pattern": "^https?://"},
+        "date": {"type": "string", "minLength": 1},
+        "excerpt": {"type": "string", "minLength": 1},
+        "context": {"type": "string"},
+        "confidence": {"type": "string", "enum": ["HIGH", "MEDIUM", "LOW"]},
+        "refs": {"type": "array", "items": {}}
+      }
+    },
+    "coverage_gap": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["angle", "reason"],
+      "properties": {
+        "angle": {"type": "string", "minLength": 1},
+        "reason": {"type": "string", "minLength": 1},
+        "next_query": {"type": "string"}
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim", "source_a", "source_b", "nature", "handling"],
+      "properties": {
+        "claim": {"type": "string", "minLength": 1},
+        "source_a": {"type": "string", "minLength": 1},
+        "source_b": {"type": "string", "minLength": 1},
+        "nature": {"type": "string", "minLength": 1},
+        "handling": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

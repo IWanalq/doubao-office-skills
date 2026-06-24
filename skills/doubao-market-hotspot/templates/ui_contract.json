@@ -1,0 +1,62 @@
+{
+  "template": "layout-v1",
+  "source_visible_limit": 5,
+  "section_order": [
+    "mast",
+    "hero",
+    "news",
+    "importance",
+    "impact",
+    "viewpoints",
+    "verification",
+    "sources",
+    "risk_disclaimer"
+  ],
+  "labels": {
+    "brand": "简报",
+    "default_title": "股民简报",
+    "default_source_scope": "公开新闻",
+    "hero": "核心观点",
+    "evidence": "关键证据",
+    "news": "有哪些关键增量信息？",
+    "timeline": "事实时间线",
+    "update_diff": "新增变化",
+    "importance": "这些信息为什么重要？",
+    "importance_changed": "相对上一阶段",
+    "importance_delta": "相对市场预期",
+    "importance_now": "为什么现在重要",
+    "impact": "上述信息如何影响市场？",
+    "impact_fact": "节点正文",
+    "viewpoints": "各方有哪些值得关注的观点？",
+    "verification": "哪些信号会验证核心观点？哪些信号代表观点证伪？",
+    "confirm": "验证核心观点",
+    "invalidate": "观点被证伪",
+    "sources": "信息来源",
+    "source_link": "查看原文",
+    "no_news": "没有匹配的重点信息。",
+    "no_sources": "暂无公开来源。",
+    "no_signal": "暂无明确信号",
+    "no_signal_body": "后续重点是等待更多公开信息。现在还不能确认核心观点。",
+    "source_expand": "展开其余 {count} 条来源",
+    "news_expand": "展开其余 {count} 条"
+  },
+  "session_labels": {
+    "pre": "盘前",
+    "intraday": "盘中",
+    "post": "盘后",
+    "non_trading": "非交易日"
+  },
+  "source_type_labels": {
+    "official": "官方",
+    "media": "媒体",
+    "institution": "机构",
+    "background": "背景"
+  },
+  "chain_roles": {
+    "single": "主线",
+    "cause": "起因",
+    "relay": "传导",
+    "result": "结果",
+    "foresight": "前瞻"
+  }
+}
